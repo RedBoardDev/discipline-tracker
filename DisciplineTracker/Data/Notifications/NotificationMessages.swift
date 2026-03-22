@@ -3,9 +3,9 @@ import Foundation
 /// Provides localized motivational messages for notifications.
 enum NotificationMessages: Sendable {
     enum Register: String, Sendable {
-        case lightPressure = "lightPressure"
-        case almostDone = "almostDone"
-        case valorization = "valorization"
+        case lightPressure
+        case almostDone
+        case valorization
     }
 
     /// Returns a random localized motivational message based on the register.

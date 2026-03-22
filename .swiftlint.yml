@@ -1,0 +1,41 @@
+included:
+  - DisciplineTracker
+  - DisciplineTrackerTests
+  - DisciplineTrackerWidget
+
+excluded:
+  - DisciplineTracker.xcodeproj
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - first_where
+  - redundant_nil_coalescing
+  - redundant_string_enum_value
+  - redundant_sendable
+  - implicit_optional_initialization
+  - non_optional_string_data_conversion
+  - unused_closure_parameter
+
+line_length:
+  warning: 130
+  error: 200
+  ignores_comments: true
+  ignores_urls: true
+
+identifier_name:
+  min_length: 2
+  excluded:
+    - id
+
+function_parameter_count:
+  warning: 6
+  error: 8
+
+type_body_length:
+  warning: 300
+  error: 500
+
+file_length:
+  warning: 600
+  error: 800

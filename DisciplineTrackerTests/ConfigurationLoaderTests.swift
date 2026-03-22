@@ -7,7 +7,7 @@ struct ConfigurationLoaderTests {
 
     // MARK: - Fixtures
 
-    private static let validJSON = """
+    private static let validJSON: Data = Data("""
     {
         "objectives": [
             {
@@ -42,9 +42,9 @@ struct ConfigurationLoaderTests {
             "defaultMinute": 30
         }
     }
-    """.data(using: .utf8)!
+    """.utf8)
 
-    private static let duplicateIdsJSON = """
+    private static let duplicateIdsJSON: Data = Data("""
     {
         "objectives": [
             {
@@ -66,7 +66,7 @@ struct ConfigurationLoaderTests {
         ],
         "notifications": { "enabled": false, "defaultHour": 8, "defaultMinute": 0 }
     }
-    """.data(using: .utf8)!
+    """.utf8)
 
     // MARK: - Tests
 

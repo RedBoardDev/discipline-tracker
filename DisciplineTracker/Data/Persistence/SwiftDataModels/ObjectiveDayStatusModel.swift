@@ -9,7 +9,7 @@ final class ObjectiveDayStatusModel {
     var isCompleted: Bool = false
     /// Raw progress: 0.0/1.0 for binary, quantity for counter, seconds for timer.
     var progress: Double = 0.0
-    var completionSourceRaw: String? = nil
+    var completionSourceRaw: String?
     var lastUpdatedAt: Date = Date.now
 
     var dayRecord: DayRecordModel?

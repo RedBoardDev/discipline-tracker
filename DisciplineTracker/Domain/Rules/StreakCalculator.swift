@@ -35,7 +35,10 @@ struct StreakCalculator: Sendable {
                 bestPerfectDayStreak = max(bestPerfectDayStreak, currentPerfectStreakCount)
             } else {
                 // Check if day gap indicates streak break
-                if let previousDate = currentPerfectStreakCount > 0 ? daySnapshots.first(where: { $0.date < snapshot.date })?.date : nil {
+                let previousDate = currentPerfectStreakCount > 0
+                    ? daySnapshots.first(where: { $0.date < snapshot.date })?.date
+                    : nil
+                if let previousDate {
                     let gap = Calendar.current.dateComponents([.day], from: snapshot.date, to: previousDate).day ?? 0
                     if gap > 1 {
                         // More than 1 day gap breaks the streak

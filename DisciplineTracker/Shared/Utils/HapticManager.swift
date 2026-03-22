@@ -44,7 +44,7 @@ final class HapticManager {
             engineCreated = true
 
             // Handle engine stops (e.g., system audio session interruption)
-            hapticEngine?.stoppedHandler = { [weak self] reason in
+            hapticEngine?.stoppedHandler = { [weak self] _ in
                 self?.engineCreated = false
                 self?.hapticEngine = nil
             }
@@ -101,6 +101,12 @@ final class HapticManager {
             sharpness = 0.7
         case .heavy:
             intensity = 1.0
+            sharpness = 1.0
+        case .soft:
+            intensity = 0.4
+            sharpness = 0.3
+        case .rigid:
+            intensity = 0.9
             sharpness = 1.0
         @unknown default:
             intensity = 0.5

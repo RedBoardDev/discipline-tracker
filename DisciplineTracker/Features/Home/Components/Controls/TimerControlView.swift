@@ -142,10 +142,10 @@ private struct ManualTimeEntrySheet: View {
     ) -> some View {
         HStack(spacing: 2) {
             Picker("", selection: value) {
-                ForEach(range, id: \.self) { n in
-                    Text("\(n)")
+                ForEach(range, id: \.self) { num in
+                    Text("\(num)")
                         .font(.system(.title2, design: .monospaced, weight: .medium))
-                        .tag(n)
+                        .tag(num)
                 }
             }
             .pickerStyle(.wheel)

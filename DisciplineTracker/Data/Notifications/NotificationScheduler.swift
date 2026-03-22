@@ -2,7 +2,7 @@ import Foundation
 import UserNotifications
 
 @MainActor
-final class NotificationScheduler: Sendable {
+final class NotificationScheduler {
     func requestAuthorization() async throws -> Bool {
         let center = UNUserNotificationCenter.current()
         try await center.requestAuthorization(options: [.alert, .sound, .badge])
