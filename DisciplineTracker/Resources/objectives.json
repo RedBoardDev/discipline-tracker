@@ -1,0 +1,59 @@
+{
+  "objectives": [
+    {
+      "id": "english",
+      "title": "1h d'anglais",
+      "icon": "globe",
+      "accent": "blue",
+      "activeDays": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "isEnabled": true,
+      "displayOrder": 1,
+      "tracking": { "mode": "timer", "targetSeconds": 3600 }
+    },
+    {
+      "id": "sport",
+      "title": "1h de sport",
+      "icon": "figure.run",
+      "accent": "green",
+      "activeDays": ["mon", "wed", "fri", "sun"],
+      "isEnabled": true,
+      "displayOrder": 2,
+      "tracking": { "mode": "timer", "targetSeconds": 3600 }
+    },
+    {
+      "id": "job",
+      "title": "1h de recherche job dev",
+      "icon": "briefcase",
+      "accent": "orange",
+      "activeDays": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "isEnabled": true,
+      "displayOrder": 3,
+      "tracking": { "mode": "timer", "targetSeconds": 3600 }
+    },
+    {
+      "id": "personal_project",
+      "title": "1h de projet perso",
+      "icon": "hammer",
+      "accent": "purple",
+      "activeDays": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "isEnabled": true,
+      "displayOrder": 4,
+      "tracking": { "mode": "timer", "targetSeconds": 3600 }
+    },
+    {
+      "id": "water",
+      "title": "Boire 2L d'eau",
+      "icon": "drop.fill",
+      "accent": "teal",
+      "activeDays": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "isEnabled": true,
+      "displayOrder": 5,
+      "tracking": { "mode": "counter", "target": 2.0, "step": 0.5, "unit": "L" }
+    }
+  ],
+  "notifications": {
+    "enabled": true,
+    "defaultHour": 19,
+    "defaultMinute": 30
+  }
+}
