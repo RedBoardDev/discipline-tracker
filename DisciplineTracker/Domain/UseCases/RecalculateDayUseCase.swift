@@ -1,10 +1,6 @@
 import Foundation
 import SwiftData
 
-/// Recalculates a day record's completion state from its objective statuses.
-///
-/// Extracted from the duplicated logic in `ToggleObjectiveUseCase`,
-/// `DayStateService.syncWidgetChanges`, and `GitHubSyncService.syncOnLaunch`.
 struct RecalculateDayUseCase: Sendable {
     private let repository: DayRecordRepositoryProtocol
 
@@ -12,7 +8,6 @@ struct RecalculateDayUseCase: Sendable {
         self.repository = repository
     }
 
-    /// Recalculates the completion state for a day record and persists the change.
     func execute(dayRecord: DayRecordModel, context: ModelContext) throws {
         let statuses = dayRecord.objectiveStatuses ?? []
         let scheduledStatuses = statuses.filter(\.isScheduled)

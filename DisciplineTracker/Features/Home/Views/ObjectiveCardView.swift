@@ -11,7 +11,6 @@ struct ObjectiveCardView: View {
         objective.tracking.isComplete(progress: effectiveProgress)
     }
 
-    /// Total progress including live timer segment.
     private var effectiveProgress: Double {
         if objective.tracking.mode == TimerTrackingProvider.mode {
             return progress + timerService.elapsedSeconds(for: objective.id)
@@ -21,13 +20,11 @@ struct ObjectiveCardView: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            // Icon
             Image(systemName: objective.icon)
                 .font(.title2)
                 .foregroundStyle(objective.accent.color)
                 .frame(width: 36, height: 36)
 
-            // Title + streak
             VStack(alignment: .leading, spacing: 2) {
                 Text(objective.title)
                     .font(.body)
@@ -42,7 +39,6 @@ struct ObjectiveCardView: View {
 
             Spacer()
 
-            // Tracking control
             TrackingControlViewFactory.makeControl(
                 objective: objective,
                 progress: progress,

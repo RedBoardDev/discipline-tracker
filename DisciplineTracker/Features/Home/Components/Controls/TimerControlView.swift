@@ -1,10 +1,5 @@
 import SwiftUI
 
-/// Control view for timer-based objectives.
-///
-/// - Tap play/pause to control the timer
-/// - Tap the time display to manually add/edit time
-/// - Timer continues running in background via persisted startedAt timestamp
 struct TimerControlView: View {
     let persistedProgress: Double
     let provider: AnyTrackingProvider
@@ -23,7 +18,6 @@ struct TimerControlView: View {
             let isComplete = provider.isComplete(progress: totalProgress)
 
             HStack(spacing: 10) {
-                // Time display — tappable for manual entry
                 Button {
                     showManualEntry = true
                 } label: {
@@ -40,7 +34,6 @@ struct TimerControlView: View {
                 }
                 .buttonStyle(.plain)
 
-                // Play/pause button
                 Button {
                     if isRunning {
                         let delta = timerService.pause(objectiveId: objectiveId)
@@ -65,10 +58,7 @@ struct TimerControlView: View {
                     targetSeconds: provider.displayInfo.target,
                     accentColor: accentColor,
                     onSet: { newSeconds in
-                        onAction(.reset)
-                        if newSeconds > 0 {
-                            onAction(.increment(step: newSeconds))
-                        }
+                        onAction(.setProgress(newSeconds))
                     }
                 )
                 .presentationDetents([.medium])
@@ -101,7 +91,6 @@ private struct ManualTimeEntrySheet: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
-                // Wheel picker — h / m / s
                 HStack(spacing: 0) {
                     wheelColumn(value: $hours, range: 0...23, label: "h")
                     wheelColumn(value: $minutes, range: 0...59, label: "m")
@@ -109,7 +98,6 @@ private struct ManualTimeEntrySheet: View {
                 }
                 .frame(height: 180)
 
-                // Confirm button
                 Button {
                     onSet(totalSeconds)
                     dismiss()
@@ -122,7 +110,6 @@ private struct ManualTimeEntrySheet: View {
                 .buttonStyle(.borderedProminent)
                 .tint(accentColor)
 
-                // Reset
                 Button("timer.reset", role: .destructive) {
                     onSet(0)
                     dismiss()

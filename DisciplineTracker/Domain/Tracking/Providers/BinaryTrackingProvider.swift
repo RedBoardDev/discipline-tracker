@@ -1,11 +1,9 @@
 import Foundation
 
-/// Tracking provider for simple done/not-done objectives.
 struct BinaryTrackingProvider: TrackingProvider {
     static let mode = "binary"
 
     struct Configuration: TrackingConfiguration {
-        // No additional configuration needed for binary tracking.
     }
 
     let configuration: Configuration
@@ -40,7 +38,7 @@ struct BinaryTrackingProvider: TrackingProvider {
     var displayInfo: TrackingDisplayInfo {
         TrackingDisplayInfo(
             mode: Self.mode,
-            progressLabel: { $0 >= 1.0 ? "Fait" : "À faire" },
+            progressLabel: { _ in "" },
             unit: nil,
             showsProgressBar: false,
             step: nil,

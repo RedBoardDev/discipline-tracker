@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// Displays the current streak count with a motivational message at the top of the Home screen.
-/// Shows a celebratory milestone banner when the streak hits a milestone value.
 struct StreakHeaderView: View {
     let currentStreak: Int
     let dayState: DayCompletionState
@@ -67,7 +65,6 @@ struct StreakHeaderView: View {
 
 // MARK: - Sub-views
 
-/// Large streak number display with glass effect.
 private struct StreakCountView: View {
     let currentStreak: Int
     let namespace: Namespace.ID
@@ -95,7 +92,6 @@ private struct StreakCountView: View {
     }
 }
 
-/// Motivational micro-message below the streak count.
 private struct MotivationalMessageView: View {
     let message: LocalizedStringKey
     let dayState: DayCompletionState
@@ -117,7 +113,6 @@ private struct MotivationalMessageView: View {
     }
 }
 
-/// Secondary stat line at the bottom of the header, with plural support.
 private struct SecondaryStatLineView: View {
     let dayState: DayCompletionState
     let remaining: Int

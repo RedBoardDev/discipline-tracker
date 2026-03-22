@@ -1,9 +1,5 @@
 import Foundation
 
-/// Tracking provider for time-based objectives (e.g., "1h of English").
-///
-/// Progress is stored in seconds. The timer session management (start/pause/resume)
-/// is handled by `TimerSessionService`; this provider only handles progress evaluation.
 struct TimerTrackingProvider: TrackingProvider {
     static let mode = "timer"
 
@@ -34,6 +30,8 @@ struct TimerTrackingProvider: TrackingProvider {
         switch action {
         case .increment(let step):
             currentProgress + step
+        case .setProgress(let value):
+            max(0, value)
         case .reset:
             0.0
         default:

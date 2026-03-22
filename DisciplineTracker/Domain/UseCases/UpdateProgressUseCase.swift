@@ -1,11 +1,17 @@
 import Foundation
 import SwiftData
 
-/// Central use case for updating an objective's progress.
-///
-/// Replaces `ToggleObjectiveUseCase` with a provider-aware approach:
-/// applies the tracking action via the provider, persists progress,
-/// and recalculates the day's completion state.
+enum UpdateProgressError: LocalizedError, Sendable {
+    case objectiveStatusNotFound(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .objectiveStatusNotFound(let id):
+            "No status record found for objective '\(id)' on the requested day."
+        }
+    }
+}
+
 struct UpdateProgressUseCase: Sendable {
     private let repository: DayRecordRepositoryProtocol
     private let objectives: [ObjectiveDefinition]
@@ -20,14 +26,6 @@ struct UpdateProgressUseCase: Sendable {
         self.recalculateDay = RecalculateDayUseCase(repository: repository)
     }
 
-    /// Applies a tracking action to an objective and persists the result.
-    ///
-    /// - Parameters:
-    ///   - objectiveId: The objective to update.
-    ///   - action: The tracking action to apply.
-    ///   - provider: The type-erased tracking provider for this objective.
-    ///   - date: The date to update (today or retroactive).
-    ///   - context: The SwiftData model context.
     func execute(
         objectiveId: String,
         action: TrackingAction,
@@ -43,7 +41,7 @@ struct UpdateProgressUseCase: Sendable {
         let statuses = dayRecord.objectiveStatuses ?? []
 
         guard let status = statuses.first(where: { $0.objectiveId == objectiveId }) else {
-            return
+            throw UpdateProgressError.objectiveStatusNotFound(objectiveId)
         }
 
         let newProgress = provider.applyAction(action, to: status.progress)

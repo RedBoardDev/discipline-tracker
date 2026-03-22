@@ -1,11 +1,9 @@
 import Foundation
 
 /// Type-erased wrapper for `TrackingProvider`, enabling storage in `ObjectiveDefinition`.
-///
 /// Needed because `TrackingProvider` has an `associatedtype Configuration`,
 /// preventing direct storage. This wrapper erases the type while preserving behavior.
 struct AnyTrackingProvider: Sendable, Hashable {
-    /// The tracking mode identifier.
     let mode: String
 
     private let _isComplete: @Sendable (Double) -> Bool

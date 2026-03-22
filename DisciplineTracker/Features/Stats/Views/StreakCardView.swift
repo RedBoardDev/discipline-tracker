@@ -28,7 +28,8 @@ struct StreakCardView: View {
         .background(tint.opacity(0.1))
         .clipShape(.rect(cornerRadius: 16))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text(label) + Text(verbatim: " : \(value)"))
+        .accessibilityLabel(Text(label))
+        .accessibilityValue(Text(verbatim: value))
     }
 }
 

@@ -1,10 +1,6 @@
 import Foundation
 import SwiftData
 
-/// Single source of truth for the current day's state.
-///
-/// Loads configuration and day records, exposes today's objectives and their progress,
-/// and provides methods to update progress. Intended to be injected via `@Environment`.
 @MainActor
 @Observable
 final class DayStateService {
@@ -30,7 +26,6 @@ final class DayStateService {
         self.repository = repository
     }
 
-    /// Loads the configuration and today's state from persistence.
     func load(context: ModelContext) throws {
         let config = try configLoader.load()
         self.configuration = config
@@ -42,7 +37,6 @@ final class DayStateService {
         isLoaded = true
     }
 
-    /// Updates progress for an objective today using a tracking action.
     func updateProgress(
         _ objectiveId: String,
         action: TrackingAction,
@@ -67,7 +61,6 @@ final class DayStateService {
         try refreshState(with: config.objectives, context: context)
     }
 
-    /// Updates progress for an objective on a past date (retroactive editing).
     func updateProgressRetroactive(
         _ objectiveId: String,
         action: TrackingAction,
@@ -93,7 +86,6 @@ final class DayStateService {
         try refreshState(with: config.objectives, context: context)
     }
 
-    /// Syncs widget changes back to SwiftData on app resume.
     func syncWidgetChanges(context: ModelContext) throws {
         guard let config = configuration,
               let widgetData = WidgetDataProvider.load() else {
@@ -132,7 +124,6 @@ final class DayStateService {
         }
     }
 
-    /// Returns whether an objective is completed today.
     func isCompleted(_ objectiveId: String) -> Bool {
         guard let config = configuration,
               let objective = config.objectives.first(where: { $0.id == objectiveId }) else {
@@ -150,7 +141,6 @@ final class DayStateService {
 
         let dayRecord = try repository.fetchOrCreate(for: .now, objectives: objectives, context: context)
 
-        // Build progress map
         var progress: [String: Double] = [:]
         let objectiveStatuses = dayRecord.objectiveStatuses ?? []
         for status in objectiveStatuses {
@@ -158,18 +148,59 @@ final class DayStateService {
         }
         progressMap = progress
 
-        // Update counts
         let scheduledStatuses = objectiveStatuses.filter(\.isScheduled)
         totalCount = scheduledStatuses.count
         completedCount = scheduledStatuses.filter(\.isCompleted).count
         dayCompletionState = dayRecord.completionState
 
-        // Compute full stats
-        let statsUseCase = ComputeStatsUseCase(repository: repository, objectives: objectives)
-        let stats = try statsUseCase.execute(context: context)
-        streakSnapshot = stats.streaks
-        perfectDaysThisMonth = stats.perfectDaysThisMonth
-        fullStats = stats
+        // Compute cheap streak snapshot (needed on every toggle for the Home header)
+        try refreshStreakSnapshot(objectives: objectives, context: context)
+    }
+
+    /// Refreshes streak and perfect day counts. Cheaper than full stats — only fetches
+    /// recent records needed for streak calculation, not completion rates or progress sums.
+    private func refreshStreakSnapshot(objectives: [ObjectiveDefinition], context: ModelContext) throws {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        guard let thirtyDaysAgo = calendar.date(byAdding: .day, value: -29, to: today),
+              let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today)) else {
+            return
+        }
+
+        let records = try repository.fetchAll(from: thirtyDaysAgo, to: today, context: context)
+        let objectiveIds = objectives.map(\.id)
+
+        let snapshots = records
+            .sorted { $0.date > $1.date }
+            .map { record in
+                DaySnapshot(
+                    date: record.date,
+                    isPerfectDay: record.isPerfectDay,
+                    objectiveResults: (record.objectiveStatuses ?? []).map {
+                        ObjectiveResult(
+                            objectiveId: $0.objectiveId,
+                            isScheduled: $0.isScheduled,
+                            isCompleted: $0.isCompleted
+                        )
+                    }
+                )
+            }
+
+        streakSnapshot = StreakCalculator().calculate(from: snapshots, objectiveIds: objectiveIds)
+        perfectDaysThisMonth = records
+            .filter {
+                calendar.compare($0.date, to: startOfMonth, toGranularity: .day) != .orderedAscending
+                && calendar.compare($0.date, to: today, toGranularity: .day) != .orderedDescending
+                && $0.isPerfectDay
+            }
+            .count
+    }
+
+    /// Refreshes the full stats (expensive). Call from StatsView, not on every toggle.
+    func refreshFullStats(context: ModelContext) throws {
+        guard let config = configuration else { return }
+        let statsUseCase = ComputeStatsUseCase(repository: repository, objectives: config.objectives)
+        fullStats = try statsUseCase.execute(context: context)
     }
 }
 

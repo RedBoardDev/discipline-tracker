@@ -2,14 +2,13 @@ import SwiftUI
 import SwiftData
 import WidgetKit
 
-/// The main screen showing today's objectives and streak.
 struct HomeView: View {
     @Environment(DayStateService.self) private var dayStateService
     @Environment(TimerSessionService.self) private var timerService
     @Environment(\.modelContext) private var modelContext
 
-    @State private var previousDayState: DayCompletionState = .empty
     @State private var showPerfectDayCelebration = false
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -41,8 +40,13 @@ struct HomeView: View {
                 }
             }
         }
-        .onAppear {
-            previousDayState = dayStateService.dayCompletionState
+        .alert("error.title", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("common.close", role: .cancel) { errorMessage = nil }
+        } message: {
+            Text(verbatim: errorMessage ?? "")
         }
     }
 
@@ -50,13 +54,17 @@ struct HomeView: View {
         guard let objective = dayStateService.todayObjectives.first(where: { $0.id == objectiveId }) else {
             return
         }
-        try? dayStateService.updateProgress(
-            objectiveId,
-            action: action,
-            provider: objective.tracking,
-            context: modelContext
-        )
-        syncWidgetData()
+        do {
+            try dayStateService.updateProgress(
+                objectiveId,
+                action: action,
+                provider: objective.tracking,
+                context: modelContext
+            )
+            syncWidgetData()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     private func syncWidgetData() {
@@ -85,7 +93,6 @@ struct HomeView: View {
 
 // MARK: - Content
 
-/// The scrollable content of the Home screen when data is loaded.
 private struct HomeContentView: View {
     let dayStateService: DayStateService
     let timerService: TimerSessionService
@@ -129,7 +136,6 @@ private struct HomeContentView: View {
 
 // MARK: - Objectives List
 
-/// Displays the list of today's objective cards inside a GlassEffectContainer.
 private struct ObjectivesListView: View {
     let objectives: [ObjectiveDefinition]
     let progressMap: [String: Double]
@@ -158,7 +164,6 @@ private struct ObjectivesListView: View {
 
 // MARK: - Perfect Day Banner
 
-/// A celebratory banner shown when all objectives are completed.
 private struct PerfectDayBanner: View {
     var body: some View {
         HStack(spacing: 8) {

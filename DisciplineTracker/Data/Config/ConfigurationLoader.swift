@@ -1,6 +1,5 @@
 import Foundation
 
-/// Errors that can occur when loading the JSON configuration.
 enum ConfigurationError: LocalizedError, Sendable {
     case fileNotFound
     case decodingFailed(Error)
@@ -18,19 +17,20 @@ enum ConfigurationError: LocalizedError, Sendable {
     }
 }
 
-/// Loads and validates the app configuration from the bundled JSON file.
 struct ConfigurationLoader: Sendable {
     private let registry: TrackingProviderRegistry
+    private let bundle: Bundle
 
-    init(registry: TrackingProviderRegistry = TrackingSetup.createRegistry()) {
+    init(
+        registry: TrackingProviderRegistry = TrackingSetup.createRegistry(),
+        bundle: Bundle = .main
+    ) {
         self.registry = registry
+        self.bundle = bundle
     }
 
-    /// Loads the configuration from the app bundle.
-    /// - Returns: A validated `AppConfiguration`.
-    /// - Throws: `ConfigurationError` if loading or validation fails.
     func load() throws -> AppConfiguration {
-        guard let url = Bundle.main.url(forResource: "objectives", withExtension: "json") else {
+        guard let url = bundle.url(forResource: "objectives", withExtension: "json") else {
             throw ConfigurationError.fileNotFound
         }
 
@@ -41,6 +41,10 @@ struct ConfigurationLoader: Sendable {
             throw ConfigurationError.fileNotFound
         }
 
+        return try decode(data)
+    }
+
+    func decode(_ data: Data) throws -> AppConfiguration {
         let configuration: AppConfiguration
         do {
             let decoder = JSONDecoder()

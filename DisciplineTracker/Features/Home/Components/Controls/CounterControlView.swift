@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// Control view for counter-based objectives (e.g., water intake).
 struct CounterControlView: View {
     let progress: Double
     let provider: AnyTrackingProvider

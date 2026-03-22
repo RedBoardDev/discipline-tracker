@@ -1,7 +1,6 @@
 import Foundation
 import SwiftData
 
-/// The result of computing all statistics for the Stats screen.
 struct StatsResult: Sendable {
     let streaks: StreakSnapshot
     let perfectDaysLast7: Int
@@ -27,7 +26,6 @@ struct StatsResult: Sendable {
     )
 }
 
-/// Computes all statistics from persisted day records and the objective configuration.
 struct ComputeStatsUseCase: Sendable {
     private let repository: DayRecordRepositoryProtocol
     private let objectives: [ObjectiveDefinition]
@@ -140,7 +138,6 @@ struct ComputeStatsUseCase: Sendable {
         return rates
     }
 
-    /// Computes actual accumulated progress per objective from persisted data.
     private func computeActualProgress(from records: [DayRecordModel]) -> [String: Double] {
         var result: [String: Double] = [:]
         for record in records {
@@ -152,7 +149,6 @@ struct ComputeStatsUseCase: Sendable {
         return result
     }
 
-    /// Computes total seconds from timer-based objectives only.
     private func computeTotalTimerSeconds(progressPerObjective: [String: Double]) -> Double {
         var total: Double = 0
         for objective in objectives where objective.tracking.mode == TimerTrackingProvider.mode {

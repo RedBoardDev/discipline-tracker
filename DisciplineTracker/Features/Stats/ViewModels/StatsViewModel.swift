@@ -4,7 +4,7 @@ import SwiftData
 /// ViewModel for the Stats screen.
 @MainActor
 @Observable
-final class StatsViewModel: Sendable {
+final class StatsViewModel {
     private let computeStatsUseCase: ComputeStatsUseCase
     private let configObjectives: [ObjectiveDefinition]
     private let repository: DayRecordRepositoryProtocol

@@ -1,16 +1,13 @@
 import Foundation
 import SwiftData
 
-/// View model for the monthly calendar view.
-///
-/// Manages month navigation, loads day completion states from persistence,
-/// and supports retroactive objective editing.
 @MainActor
 @Observable
 final class CalendarViewModel {
     private(set) var currentMonth: Date = Calendar.current.startOfMonth(for: .now)
     private(set) var dayStates: [Date: DayCompletionState] = [:]
     private(set) var isLoading = false
+    var errorMessage: String?
 
     private let repository: DayRecordRepositoryProtocol
     private let calendar = Calendar.current
@@ -38,7 +35,7 @@ final class CalendarViewModel {
 
     func monthTitle(locale: Locale = .autoupdatingCurrent) -> String {
         let raw = currentMonth.formatted(.dateTime.month(.wide).year().locale(locale))
-        return raw.prefix(1).uppercased() + raw.dropFirst()
+        return raw.capitalized(with: locale)
     }
 
     var canGoForward: Bool {
@@ -92,8 +89,6 @@ final class CalendarViewModel {
         loadMonth(context: context)
     }
 
-    /// Updates progress for an objective on a specific date (retroactive editing).
-    /// For retroactive edits, we use toggle action which works for all modes.
     func updateProgress(
         objectiveId: String,
         action: TrackingAction,
@@ -101,21 +96,42 @@ final class CalendarViewModel {
         dayStateService: DayStateService,
         context: ModelContext
     ) {
+        errorMessage = nil
         guard let objective = dayStateService.configuration?.objectives.first(where: { $0.id == objectiveId }) else {
             return
+        }
+
+        // Translate toggle to a meaningful action for non-binary providers.
+        // For past dates, load the actual persisted progress rather than today's progressMap.
+        let resolvedAction: TrackingAction
+        if case .toggle = action, objective.tracking.mode != BinaryTrackingProvider.mode {
+            let currentProgress: Double
+            if let record = try? repository.fetchOrCreate(
+                for: date,
+                objectives: dayStateService.configuration?.objectives ?? [],
+                context: context
+            ), let status = (record.objectiveStatuses ?? []).first(where: { $0.objectiveId == objectiveId }) {
+                currentProgress = status.progress
+            } else {
+                currentProgress = 0.0
+            }
+            let isComplete = objective.tracking.isComplete(progress: currentProgress)
+            resolvedAction = isComplete ? .setProgress(0) : .setProgress(objective.tracking.displayInfo.target)
+        } else {
+            resolvedAction = action
         }
 
         do {
             try dayStateService.updateProgressRetroactive(
                 objectiveId,
-                action: action,
+                action: resolvedAction,
                 provider: objective.tracking,
                 date: date,
                 context: context
             )
             loadMonth(context: context)
         } catch {
-            // Error is silently handled; the UI state remains unchanged.
+            errorMessage = error.localizedDescription
         }
     }
 }

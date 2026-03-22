@@ -1,6 +1,5 @@
 import Foundation
 
-/// Tracking provider for counter-based objectives (e.g., "Drink 2L of water").
 struct CounterTrackingProvider: TrackingProvider {
     static let mode = "counter"
 
@@ -35,6 +34,8 @@ struct CounterTrackingProvider: TrackingProvider {
             currentProgress + step
         case .decrement(let step):
             max(0, currentProgress - step)
+        case .setProgress(let value):
+            max(0, value)
         case .reset:
             0.0
         default:

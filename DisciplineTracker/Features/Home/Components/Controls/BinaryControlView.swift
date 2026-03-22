@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// Control view for binary (done/not done) objectives.
 struct BinaryControlView: View {
     let isCompleted: Bool
     let accentColor: Color

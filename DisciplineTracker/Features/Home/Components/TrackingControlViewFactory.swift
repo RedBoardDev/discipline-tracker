@@ -1,10 +1,5 @@
 import SwiftUI
 
-/// Dispatches to the appropriate control view based on tracking mode.
-///
-/// To add a new tracking mode:
-/// 1. Create a control view in `Controls/`
-/// 2. Add a case here
 enum TrackingControlViewFactory {
     @MainActor @ViewBuilder
     static func makeControl(

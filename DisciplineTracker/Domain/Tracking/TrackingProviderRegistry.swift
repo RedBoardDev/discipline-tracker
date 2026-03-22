@@ -1,24 +1,26 @@
 import Foundation
 
-/// Registry that maps tracking mode strings to their provider factories.
-///
 /// Injected into `JSONDecoder.userInfo` so that `ObjectiveDefinition` can decode
 /// the `tracking` field into the correct `AnyTrackingProvider`.
-final class TrackingProviderRegistry: @unchecked Sendable {
+/// All registrations must be provided at init time — the registry is immutable after construction.
+final class TrackingProviderRegistry: Sendable {
     static let userInfoKey = CodingUserInfoKey(rawValue: "trackingProviderRegistry")!
 
-    private var registrations: [String: @Sendable (Decoder) throws -> AnyTrackingProvider] = [:]
+    private let registrations: [String: @Sendable (Decoder) throws -> AnyTrackingProvider]
 
-    /// Registers a tracking provider type for a given mode string.
-    func register<P: TrackingProvider>(_ type: P.Type) {
-        registrations[P.mode] = { decoder in
+    init(registrations: [String: @Sendable (Decoder) throws -> AnyTrackingProvider] = [:]) {
+        self.registrations = registrations
+    }
+
+    func registering<P: TrackingProvider>(_ type: P.Type) -> TrackingProviderRegistry {
+        var updated = registrations
+        updated[P.mode] = { decoder in
             let config = try P.Configuration(from: decoder)
             return AnyTrackingProvider(P(configuration: config))
         }
+        return TrackingProviderRegistry(registrations: updated)
     }
 
-    /// Decodes an `AnyTrackingProvider` from the given decoder, using the "mode" field
-    /// to look up the correct provider factory.
     func decode(from decoder: Decoder) throws -> AnyTrackingProvider {
         let container = try decoder.container(keyedBy: AnyCodingKey.self)
         let mode = try container.decode(String.self, forKey: AnyCodingKey(stringValue: "mode"))
@@ -36,7 +38,6 @@ final class TrackingProviderRegistry: @unchecked Sendable {
     }
 }
 
-/// A flexible coding key that accepts any string value.
 struct AnyCodingKey: CodingKey {
     let stringValue: String
     let intValue: Int?

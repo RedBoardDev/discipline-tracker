@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// A row displaying statistics for a single objective:
-/// icon, title, current/best streak, completion rate bars, and actual progress.
 struct ObjectiveStatsRowView: View {
     let objective: ObjectiveDefinition
     let currentStreak: Int

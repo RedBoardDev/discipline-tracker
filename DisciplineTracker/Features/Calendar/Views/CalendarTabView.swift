@@ -1,7 +1,6 @@
 import SwiftUI
 import SwiftData
 
-/// Monthly calendar view showing daily completion states with color-coded cells.
 struct CalendarTabView: View {
     @Environment(DayStateService.self) private var dayStateService
     @Environment(\.modelContext) private var modelContext
@@ -43,6 +42,14 @@ struct CalendarTabView: View {
             .task {
                 viewModel.loadMonth(context: modelContext)
             }
+            .alert("error.title", isPresented: Binding(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            )) {
+                Button("common.close", role: .cancel) { viewModel.errorMessage = nil }
+            } message: {
+                Text(verbatim: viewModel.errorMessage ?? "")
+            }
             .sheet(item: $selectedDate) { date in
                 DayDetailView(
                     date: date,
@@ -71,7 +78,6 @@ extension Date: @retroactive Identifiable {
 
 // MARK: - Month Navigation
 
-/// Header with previous/next month buttons and month title.
 private struct MonthNavigationView: View {
     let title: String
     let canGoForward: Bool
@@ -101,7 +107,6 @@ private struct MonthNavigationView: View {
 
 // MARK: - Weekday Header
 
-/// Row of weekday abbreviations (Mon, Tue, etc.) in the current locale.
 private struct WeekdayHeaderRow: View {
     @Environment(\.locale) private var locale
 
@@ -127,7 +132,6 @@ private struct WeekdayHeaderRow: View {
 
 // MARK: - Calendar Grid
 
-/// The 7-column grid of day cells for the current month.
 private struct CalendarGridView: View {
     let days: [Date]
     let firstWeekdayOffset: Int
@@ -156,7 +160,6 @@ private struct CalendarGridView: View {
 
 // MARK: - Day Cell
 
-/// A single day cell in the calendar grid, colored by completion state.
 private struct CalendarDayCellView: View {
     let date: Date
     let state: DayCompletionState

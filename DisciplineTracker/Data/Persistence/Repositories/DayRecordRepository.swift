@@ -1,14 +1,23 @@
 import Foundation
 import SwiftData
 
-/// Protocol defining day record persistence operations.
+enum DayRecordRepositoryError: LocalizedError, Sendable {
+    case invalidDate(Date)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidDate(let date):
+            "Could not compute next day from date: \(date)."
+        }
+    }
+}
+
 protocol DayRecordRepositoryProtocol: Sendable {
     func fetchOrCreate(for date: Date, objectives: [ObjectiveDefinition], context: ModelContext) throws -> DayRecordModel
     func fetchAll(from startDate: Date, to endDate: Date, context: ModelContext) throws -> [DayRecordModel]
     func save(context: ModelContext) throws
 }
 
-/// Repository handling SwiftData operations for day records.
 struct DayRecordRepository: DayRecordRepositoryProtocol {
 
     func fetchOrCreate(
@@ -17,7 +26,9 @@ struct DayRecordRepository: DayRecordRepositoryProtocol {
         context: ModelContext
     ) throws -> DayRecordModel {
         let startOfDay = Calendar.current.startOfDay(for: date)
-        let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        guard let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay) else {
+            throw DayRecordRepositoryError.invalidDate(date)
+        }
 
         let predicate = #Predicate<DayRecordModel> { record in
             record.date >= startOfDay && record.date < nextDay
@@ -49,7 +60,6 @@ struct DayRecordRepository: DayRecordRepositoryProtocol {
         let record = DayRecordModel(date: startOfDay)
         context.insert(record)
 
-        // Create objective statuses for this day
         for objective in objectives {
             let isScheduled = objective.isActive(on: startOfDay)
             let status = ObjectiveDayStatusModel(

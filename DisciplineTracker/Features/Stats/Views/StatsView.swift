@@ -1,7 +1,6 @@
 import SwiftUI
 import SwiftData
 
-/// Statistics screen with streaks, heatmap, and completion rates.
 struct StatsView: View {
     @Environment(\.modelContext) private var modelContext
 

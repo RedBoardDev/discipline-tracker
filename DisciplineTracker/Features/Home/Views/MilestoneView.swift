@@ -57,7 +57,6 @@ struct MilestoneView: View {
 // MARK: - Auto-dismiss modifier
 
 extension View {
-    /// No-op lifecycle hook — dismiss is handled by the parent view.
     func onAppearTrigger() -> some View {
         self
     }
